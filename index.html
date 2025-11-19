@@ -1,10 +1,9 @@
-me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.html:
 <!DOCTYPE html>
 <html lang="pt-BR" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EstoquePro v15.0 Enterprise - Sistema Corrigido</title>
+    <title>ConfereAI v2.0</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -71,7 +70,7 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
     <div class="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 z-40 shadow-sm">
         <div class="font-bold text-xl flex items-center gap-2">
             <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>
-            <span class="dark:text-white">Estoque<span class="text-primary-500">Pro</span></span>
+            <span class="dark:text-white">Confere<span class="text-primary-500">AI</span></span>
         </div>
         <button id="mobile-menu-btn" class="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -85,7 +84,7 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
                 <div class="w-9 h-9 bg-gradient-to-br from-primary-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                 </div>
-                <span class="text-white">Estoque<span class="text-primary-400">Pro</span></span>
+                <span class="text-white">Confere<span class="text-primary-400">AI</span></span>
             </div>
         </div>
 
@@ -117,19 +116,16 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
         </nav>
 
         <div class="p-4 border-t border-slate-800 bg-slate-900 dark:bg-slate-950 space-y-3">
-             <!-- Botões de Backup Restaurados -->
+            <!-- Botões de Backup do Sistema -->
             <div class="grid grid-cols-2 gap-2">
-                <button onclick="exportData()" class="flex items-center justify-center px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-400 hover:text-white transition-colors border border-slate-700" title="Baixar Backup">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Exportar
+                <button onclick="backupSystemData()" class="flex items-center justify-center px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-400 hover:text-white transition-colors border border-slate-700" title="Baixar Backup JSON">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Backup
                 </button>
-                <label class="flex items-center justify-center px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-400 hover:text-white transition-colors cursor-pointer border border-slate-700" title="Restaurar Backup">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m-4 4v12"/></svg> Importar
+                <label class="flex items-center justify-center px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-400 hover:text-white transition-colors cursor-pointer border border-slate-700" title="Restaurar Backup JSON">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m-4 4v12"/></svg> Restaurar
                     <input type="file" id="importFile" class="hidden" accept=".json">
                 </label>
             </div>
-            <button id="factory-reset-btn" class="flex items-center justify-center w-full py-2 px-4 rounded-lg bg-rose-900/30 hover:bg-rose-900/50 text-rose-400 text-xs font-bold uppercase tracking-wide transition-colors border border-rose-900">
-                ⚠ Restaurar Fábrica
-            </button>
             <button id="theme-toggle" class="flex items-center justify-center w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors text-slate-300 text-sm font-medium border border-slate-700">
                 <span class="dark:hidden">Modo Escuro</span><span class="hidden dark:inline">Modo Claro</span>
             </button>
@@ -203,10 +199,24 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
 
         <!-- PRODUCTS -->
         <div id="products-content" class="page-content">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 animate-fade-in">
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4 animate-fade-in">
                 <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Catálogo</h1>
-                <div class="flex gap-3 w-full md:w-auto">
-                    <button id="add-product-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2 rounded-xl shadow-lg shadow-primary-500/30 transition-all active:scale-95 text-sm font-medium flex items-center justify-center">Novo Produto</button>
+                <div class="flex flex-wrap gap-3 w-full xl:w-auto">
+                    <!-- Botões CSV de Produtos -->
+                    <button onclick="exportToCSV('products')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl shadow-lg shadow-emerald-500/30 transition-all active:scale-95 text-sm font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Baixar CSV
+                    </button>
+                    <label class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-95 text-sm font-medium flex items-center cursor-pointer">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Importar CSV
+                        <input type="file" id="csvProductInput" class="hidden" accept=".csv">
+                    </label>
+                    <div class="w-px h-8 bg-slate-300 dark:bg-slate-700 mx-1 hidden md:block"></div>
+                    <button id="add-product-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2 rounded-xl shadow-lg shadow-primary-500/30 transition-all active:scale-95 text-sm font-medium flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Novo Produto
+                    </button>
                 </div>
             </div>
 
@@ -244,14 +254,24 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
 
         <!-- SUPPLIERS -->
         <div id="suppliers-content" class="page-content">
-             <div class="flex justify-between mb-6 animate-fade-in">
+             <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 animate-fade-in">
                 <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Fornecedores</h1>
-                <button id="add-supplier-btn" class="bg-cyan-600 text-white px-4 py-2 rounded-xl hover:bg-cyan-700 transition shadow-lg shadow-cyan-500/30 text-sm font-medium flex gap-2 items-center">Novo Fornecedor</button>
+                <div class="flex gap-3">
+                    <!-- Botão CSV de Fornecedores -->
+                    <button onclick="exportToCSV('suppliers')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl shadow-lg shadow-emerald-500/30 transition-all active:scale-95 text-sm font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Lista CSV
+                    </button>
+                    <button id="add-supplier-btn" class="bg-primary-600 text-white px-5 py-2 rounded-xl hover:bg-primary-700 transition shadow-lg shadow-primary-500/30 text-sm font-medium flex gap-2 items-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Novo Fornecedor
+                    </button>
+                </div>
             </div>
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in delay-100">
-                <div class="overflow-x-auto">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in delay-100 flex flex-col h-[calc(100vh-200px)]">
+                <div class="overflow-auto flex-1 custom-scrollbar">
                      <table class="w-full text-left">
-                        <thead class="bg-slate-50 dark:bg-slate-900 text-xs text-slate-500 uppercase"><tr class="border-b border-slate-100 dark:border-slate-700"><th class="px-6 py-4">Empresa</th><th class="px-6 py-4">CNPJ</th><th class="px-6 py-4">Contato</th><th class="px-6 py-4">Cidade/UF</th><th class="px-6 py-4 text-center w-32">Ações</th></tr></thead>
+                        <thead class="bg-slate-50 dark:bg-slate-900 text-xs text-slate-500 uppercase sticky top-0"><tr class="border-b border-slate-100 dark:border-slate-700"><th class="px-6 py-4">Empresa</th><th class="px-6 py-4">CNPJ</th><th class="px-6 py-4">Contato</th><th class="px-6 py-4">Cidade/UF</th><th class="px-6 py-4 text-center w-32">Ações</th></tr></thead>
                         <tbody id="suppliers-table-body" class="divide-y divide-slate-100 dark:divide-slate-700 text-sm dark:text-slate-300"></tbody>
                     </table>
                 </div>
@@ -352,66 +372,68 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
         </div>
     </div>
 
-    <!-- SUPPLIER MODAL (COMPLETO) -->
-    <div id="supplier-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-        <div class="glass-panel dark:bg-slate-800 p-6 rounded-2xl w-full max-w-2xl shadow-2xl animate-enter border border-slate-200 dark:border-slate-700 overflow-y-auto max-h-[90vh]">
-            <div class="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
-                 <h2 class="text-lg font-bold text-slate-800 dark:text-white">Novo Fornecedor</h2>
-                 <button onclick="document.getElementById('supplier-modal').classList.add('hidden')" class="text-slate-400 hover:text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    <!-- SUPPLIER MODAL (PADRONIZADO) -->
+    <div id="supplier-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4 transition-opacity">
+        <div class="glass-panel rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-fade-in border border-slate-200 dark:border-slate-700">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                <h2 id="supplier-modal-title" class="text-xl font-bold text-slate-800 dark:text-white">Fornecedor</h2>
+                <button onclick="document.getElementById('supplier-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
-            <form id="supplier-form" class="space-y-4">
+            <form id="supplier-form" class="p-6 space-y-6">
                 <input type="hidden" id="supplierId">
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Nome da Empresa</label>
-                        <input id="supplierName" class="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500 dark:text-white" required>
+                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Nome da Empresa</label>
+                        <input id="supplierName" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" required>
                     </div>
                     <div>
-                         <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">CNPJ</label>
-                         <input id="supplierCnpj" class="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500 dark:text-white" placeholder="00.000.000/0000-00" oninput="maskCNPJ(this)">
+                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">CNPJ</label>
+                        <input id="supplierCnpj" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" placeholder="00.000.000/0000-00" oninput="maskCNPJ(this)">
                     </div>
                     <div>
-                         <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Telefone</label>
-                         <input id="supplierPhone" class="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500 dark:text-white" placeholder="(00) 00000-0000" oninput="maskPhone(this)">
+                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Telefone</label>
+                        <input id="supplierPhone" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" placeholder="(00) 00000-0000" oninput="maskPhone(this)">
                     </div>
                 </div>
                 
-                <div class="border-t border-slate-100 dark:border-slate-700 pt-4 mt-2">
+                <div class="border-t border-slate-100 dark:border-slate-700 pt-4">
                     <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wide">Endereço Completo</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                          <div>
-                             <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">CEP</label>
-                             <input id="supplierCep" class="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500 dark:text-white" placeholder="00000-000" oninput="maskCEP(this)">
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">CEP</label>
+                             <input id="supplierCep" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" placeholder="00000-000" oninput="maskCEP(this)">
                          </div>
                          <div class="md:col-span-2">
-                             <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Rua</label>
-                             <input id="supplierAddress" class="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500 dark:text-white">
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Rua</label>
+                             <input id="supplierAddress" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white">
                          </div>
                          <div>
-                             <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Número</label>
-                             <input id="supplierNumber" class="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500 dark:text-white">
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Número</label>
+                             <input id="supplierNumber" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white">
                          </div>
                          <div>
-                             <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Bairro</label>
-                             <input id="supplierDistrict" class="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500 dark:text-white">
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Bairro</label>
+                             <input id="supplierDistrict" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white">
                          </div>
                          <div>
-                             <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">Cidade</label>
-                             <input id="supplierCity" class="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500 dark:text-white">
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Cidade</label>
+                             <input id="supplierCity" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white">
                          </div>
                          <div>
-                             <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">UF</label>
-                             <input id="supplierState" class="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500 dark:text-white" maxlength="2" placeholder="SP">
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">UF</label>
+                             <input id="supplierState" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" maxlength="2" placeholder="SP">
                          </div>
                          <div class="md:col-span-2">
-                             <label class="block text-xs font-bold text-slate-500 mb-1 uppercase">E-mail</label>
-                             <input id="supplierEmail" type="email" class="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500 dark:text-white">
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">E-mail</label>
+                             <input id="supplierEmail" type="email" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white">
                          </div>
                     </div>
                 </div>
-                <div class="flex justify-end gap-2 pt-4">
-                    <button type="button" onclick="document.getElementById('supplier-modal').classList.add('hidden')" class="px-4 py-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg dark:text-slate-300">Cancelar</button>
-                    <button type="submit" class="px-5 py-2 bg-cyan-600 text-white rounded-lg shadow active:scale-95 hover:bg-cyan-700 font-medium">Salvar</button>
+                
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="document.getElementById('supplier-modal').classList.add('hidden')" class="px-5 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-medium transition-colors">Cancelar</button>
+                    <button type="submit" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-lg transition-transform active:scale-95 font-medium">Salvar Fornecedor</button>
                 </div>
             </form>
         </div>
@@ -469,10 +491,9 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const STORAGE_KEY = 'estoquePro_v15_FINAL_FIX'; 
+            const STORAGE_KEY = 'ConfereAI V2.0'; 
             const ITEMS_PER_PAGE = 8;
             let currentPage = 1;
-            let sortDirection = 1;
             
             Chart.defaults.font.family = "'Inter', sans-serif";
             Chart.defaults.color = '#94a3b8';
@@ -536,6 +557,138 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
                 renderMovements();
                 populateSelectors();
             }
+
+            // --- CSV FUNCTIONS (IMPORT/EXPORT) ---
+            window.exportToCSV = (type) => {
+                let csvContent = "data:text/csv;charset=utf-8,";
+                let filename = "export.csv";
+
+                if (type === 'products') {
+                    csvContent += "ID,Nome,SKU,Categoria,Qtd,Preço,Custo,FornecedorID\n";
+                    state.products.forEach(p => {
+                        const row = [
+                            p.id,
+                            `"${p.name.replace(/"/g, '""')}"`, // Escape quotes
+                            p.sku,
+                            p.category,
+                            p.quantity,
+                            p.price.toFixed(2),
+                            (p.costPrice || 0).toFixed(2),
+                            p.supplierId || ''
+                        ].join(",");
+                        csvContent += row + "\n";
+                    });
+                    filename = "produtos_estoque.csv";
+                } else if (type === 'suppliers') {
+                    csvContent += "ID,Nome,CNPJ,Telefone,Email,Cidade,UF\n";
+                    state.suppliers.forEach(s => {
+                        const row = [
+                            s.id,
+                            `"${s.name.replace(/"/g, '""')}"`,
+                            s.cnpj,
+                            s.phone,
+                            s.email,
+                            s.city,
+                            s.state
+                        ].join(",");
+                        csvContent += row + "\n";
+                    });
+                    filename = "fornecedores_estoque.csv";
+                }
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", filename);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            document.getElementById('csvProductInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const csvData = event.target.result;
+                    const lines = csvData.split('\n');
+                    let importedCount = 0;
+
+                    // Skip header (start at 1)
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+
+                        // Simple CSV Split (Note: doesn't handle commas inside quotes perfectly without regex, but works for simple CSVs)
+                        const cols = line.split(','); 
+                        
+                        // Expected: ID,Nome,SKU,Categoria,Qtd,Preço,Custo,FornecedorID
+                        // We ignore ID for import to avoid conflict, generate new ID
+                        if (cols.length >= 3) {
+                            const name = cols[1].replace(/"/g, '');
+                            const sku = cols[2];
+                            
+                            // Check if SKU exists
+                            if (state.products.some(p => p.sku === sku)) continue;
+
+                            const newProd = {
+                                id: Date.now() + i,
+                                name: name,
+                                sku: sku,
+                                category: cols[3] || 'Geral',
+                                quantity: parseInt(cols[4]) || 0,
+                                price: parseFloat(cols[5]) || 0,
+                                costPrice: parseFloat(cols[6]) || 0,
+                                supplierId: parseInt(cols[7]) || null,
+                                minStock: 5,
+                                image: null
+                            };
+                            
+                            // Ensure category exists
+                            if (!state.categories.includes(newProd.category)) {
+                                state.categories.push(newProd.category);
+                            }
+
+                            state.products.push(newProd);
+                            importedCount++;
+                        }
+                    }
+                    alert(`${importedCount} produtos importados com sucesso!`);
+                    saveAndRender();
+                    e.target.value = ''; // Reset input
+                };
+                reader.readAsText(file);
+            });
+            
+            // Backup System JSON
+            window.backupSystemData = () => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+                const link = document.createElement('a');
+                link.setAttribute("href", dataStr);
+                link.setAttribute("download", "backup_sistema_estoque.json");
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            };
+            
+            document.getElementById('importFile').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const newState = JSON.parse(event.target.result);
+                        if(newState.products && newState.suppliers) {
+                            state = newState;
+                            state.movements = state.movements.map(m => ({...m, date: new Date(m.date)}));
+                            saveAndRender();
+                            alert('Backup restaurado com sucesso!');
+                        } else { throw new Error('Formato inválido'); }
+                    } catch(err) { alert('Erro ao ler arquivo de backup.'); }
+                };
+                reader.readAsText(file);
+            });
 
             // --- DASHBOARD ---
             function renderDashboard() {
@@ -604,8 +757,7 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
                     tbody.innerHTML += `
                         <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                             <td class="px-6 py-3"><div class="flex items-center gap-3">${img}<div><span class="font-medium dark:text-slate-200 block">${p.name}</span><span class="text-[10px] text-slate-400 uppercase">${supName}</span></div></div></td>
-                            <td class="px-6 py-3 text-slate-500">${p.sku}</td>
-                            <td class="px-6 py-3"><span class="px-2 py-1 rounded text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${p.category}</span></td>
+                            <td class="px-6 py-3 text-slate-500">${supName}</td>
                             <td class="px-6 py-3 text-center font-bold dark:text-slate-300">${p.quantity}</td>
                             <td class="px-6 py-3 text-right dark:text-slate-300">${formatCurrency(p.price)}</td>
                             <td class="px-6 py-3 text-center"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${status}</span></td>
@@ -631,10 +783,12 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
                             <td class="px-6 py-4"><div class="font-medium dark:text-slate-200">${s.name}</div><div class="text-xs text-slate-400">${s.address}, ${s.number} - ${s.city}/${s.state}</div></td>
                             <td class="px-6 py-4 font-mono text-sm text-slate-500">${s.cnpj || '-'}</td>
                             <td class="px-6 py-4 text-sm text-slate-500"><div>${s.phone || ''}</div><div class="text-xs">${s.email || ''}</div></td>
-                            <td class="px-6 py-4 text-sm text-slate-500 text-center">${s.cep || '-'}</td>
+                            <td class="px-6 py-4 text-sm text-slate-500">${s.city}/${s.state}</td>
                             <td class="px-6 py-4 text-center">
-                                <button onclick="openSupplierModal(${s.id})" class="text-primary-500 hover:text-primary-700 mr-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
-                                <button onclick="openDeleteModal(${s.id}, 'supplier')" class="text-slate-400 hover:text-rose-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                <div class="flex justify-center gap-2">
+                                    <button onclick="openSupplierModal(${s.id})" class="text-slate-400 hover:text-primary-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                                    <button onclick="openDeleteModal(${s.id}, 'supplier')" class="text-slate-400 hover:text-rose-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                </div>
                             </td>
                         </tr>`;
                 });
@@ -713,13 +867,11 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
                     const idx = state.products.findIndex(p=>p.id===editingId);
                     data.quantity = state.products[idx].quantity; // Preserve current qty
                     state.products[idx] = { ...state.products[idx], ...data };
-                    showToast('Produto atualizado!');
                 } else {
                     const qty = parseInt(document.getElementById('productQuantity').value);
-                    if(state.products.some(p=>p.sku === data.sku)) { showToast('Erro: SKU já existe!', 'error'); return; }
+                    if(state.products.some(p=>p.sku === data.sku)) { alert('Erro: SKU já existe!'); return; }
                     state.products.push({ ...data, id: Date.now(), quantity: qty });
                     addMovementLog(data.name, 'cadastro', qty, qty);
-                    showToast('Produto criado!');
                 }
                 document.getElementById('product-modal').classList.add('hidden');
                 saveAndRender();
@@ -744,11 +896,17 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
             };
 
             // --- SUPPLIER FORM ---
-            document.getElementById('add-supplier-btn').addEventListener('click', () => { supplierEditingId = null; document.getElementById('supplier-form').reset(); document.getElementById('supplier-modal').classList.remove('hidden'); });
+            document.getElementById('add-supplier-btn').addEventListener('click', () => { 
+                supplierEditingId = null; 
+                document.getElementById('supplier-form').reset(); 
+                document.getElementById('supplier-modal-title').innerText = 'Novo Fornecedor';
+                document.getElementById('supplier-modal').classList.remove('hidden'); 
+            });
             
             window.openSupplierModal = (id) => {
                 supplierEditingId = id;
                 const s = state.suppliers.find(x => x.id === id);
+                document.getElementById('supplier-modal-title').innerText = 'Editar Fornecedor';
                 document.getElementById('supplierName').value = s.name;
                 document.getElementById('supplierCnpj').value = s.cnpj;
                 document.getElementById('supplierPhone').value = s.phone;
@@ -783,7 +941,7 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
                     state.suppliers.push({id: Date.now(), ...data});
                 }
                 document.getElementById('supplier-modal').classList.add('hidden');
-                saveAndRender(); showToast('Fornecedor salvo!');
+                saveAndRender();
             });
 
             // --- OTHER LOGIC ---
@@ -791,41 +949,41 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
             document.getElementById('category-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const name = document.getElementById('categoryNameInput').value;
-                if(state.categories.includes(name)) { showToast('Categoria já existe!', 'error'); return; }
+                if(state.categories.includes(name)) { alert('Categoria já existe!'); return; }
                 state.categories.push(name);
                 document.getElementById('category-modal').classList.add('hidden');
-                saveAndRender(); showToast('Categoria adicionada!');
+                saveAndRender();
             });
 
-            window.openStockModal = (id) => { stockId = id; const p = state.products.find(x=>x.id===id); document.getElementById('stockProductName').innerText = p.name; document.getElementById('stockCurrentQuantity').innerText = p.quantity; document.getElementById('stock-modal').classList.remove('hidden'); };
+            window.openStockModal = (id) => { stockId = id; const p = state.products.find(x=>x.id===id); document.getElementById('stockProductName').innerText = p.name; document.getElementById('movementQuantity').value = ''; document.getElementById('stock-modal').classList.remove('hidden'); };
             document.getElementById('stock-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const p = state.products.find(x=>x.id===stockId);
                 const type = document.querySelector('input[name="movementType"]:checked').value;
                 const qty = parseInt(document.getElementById('movementQuantity').value);
-                if(type==='saida' && qty>p.quantity) { showToast('Estoque insuficiente!', 'error'); return; }
+                if(type==='saida' && qty>p.quantity) { alert('Estoque insuficiente!'); return; }
                 p.quantity = type==='entrada' ? p.quantity + qty : p.quantity - qty;
                 addMovementLog(p.name, type, qty, p.quantity);
                 document.getElementById('stock-modal').classList.add('hidden');
-                saveAndRender(); showToast('Estoque atualizado.');
+                saveAndRender();
             });
 
             window.openDeleteModal = (id, type) => { deleteId = id; deleteType = type; document.getElementById('delete-modal').classList.remove('hidden'); };
             document.getElementById('confirm-delete-btn').addEventListener('click', () => {
                 if(deleteType === 'product') state.products = state.products.filter(p=>p.id!==deleteId);
                 if(deleteType === 'supplier') {
-                    if(state.products.some(p=>p.supplierId == deleteId)) { showToast('Erro: Fornecedor em uso!', 'error'); return; }
+                    if(state.products.some(p=>p.supplierId == deleteId)) { alert('Erro: Fornecedor em uso!'); return; }
                     state.suppliers = state.suppliers.filter(s=>s.id!==deleteId);
                 }
                 if(deleteType === 'category') {
-                    if(state.products.some(p=>p.category === state.categories[deleteId])) { showToast('Erro: Categoria em uso!', 'error'); return; }
+                    if(state.products.some(p=>p.category === state.categories[deleteId])) { alert('Erro: Categoria em uso!'); return; }
                     state.categories.splice(deleteId, 1);
                 }
                 document.getElementById('delete-modal').classList.add('hidden');
-                saveAndRender(); showToast('Excluído com sucesso.');
+                saveAndRender();
             });
 
-            // HELPERS & EXPORT
+            // HELPERS
             window.maskCurrency = (el) => { let v=el.value.replace(/\D/g,''); v=(v/100).toFixed(2)+''; el.value = v.replace('.',',').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.'); };
             window.maskCNPJ = (el) => { el.value = el.value.replace(/\D/g,'').replace(/^(\d{2})(\d)/,"$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/,"$1.$2.$3").replace(/\.(\d{3})(\d)/,".$1/$2").replace(/(\d{4})(\d)/,"$1-$2").substring(0,18); }
             window.maskPhone = (el) => { el.value = el.value.replace(/\D/g,'').replace(/^(\d{2})(\d)/,"($1) $2").replace(/(\d)(\d{4})$/,"$1-$2").substring(0,15); }
@@ -836,14 +994,16 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
             document.getElementById('productImageInput').addEventListener('change', (e) => {
                 const f = e.target.files[0];
                 if(f && f.size <= 2000000) { const r = new FileReader(); r.onload = (ev) => { currentImage = ev.target.result; document.getElementById('image-preview').innerHTML = `<img src="${currentImage}" class="w-full h-full object-cover rounded-xl">`; }; r.readAsDataURL(f); }
-                else showToast('Imagem muito grande (Max 2MB)', 'error');
+                else alert('Imagem muito grande (Max 2MB)');
             });
 
-            document.getElementById('factory-reset-btn').addEventListener('click', () => {
-                if(confirm('Isso APAGARÁ TODOS OS DADOS. Confirmar?')) {
-                    seedData(); renderAll(); showToast('Sistema restaurado.');
-                }
-            });
+            // REMOVIDO: Listener do factory-reset-btn que causava o erro
+            
+            document.getElementById('prev-page').addEventListener('click', () => { if(currentPage > 1) { currentPage--; renderProductsTable(); } });
+            document.getElementById('next-page').addEventListener('click', () => { currentPage++; renderProductsTable(); });
+            document.getElementById('product-search').addEventListener('input', () => { currentPage = 1; renderProductsTable(); });
+            document.getElementById('filter-category').addEventListener('change', () => { currentPage = 1; renderProductsTable(); });
+            document.getElementById('filter-supplier').addEventListener('change', () => { currentPage = 1; renderProductsTable(); });
 
             function addMovementLog(productName, type, qty, newStock) {
                 state.movements.unshift({ id: Date.now(), date: new Date(), productName, type, quantity: qty, newStock });
@@ -869,9 +1029,6 @@ me ajude a separar esse codigo em 3 arquivos em scripts.j, styles.css e index.ht
             document.getElementById('mobile-menu-btn').addEventListener('click', toggleSidebar);
             document.getElementById('close-sidebar-btn').addEventListener('click', toggleSidebar);
             document.getElementById('sidebar-overlay').addEventListener('click', toggleSidebar);
-            document.querySelectorAll('[id^="close-modal"], [id^="cancel-"]').forEach(btn => {
-                btn.addEventListener('click', () => document.querySelectorAll('[id$="-modal"]').forEach(m => m.classList.add('hidden')));
-            });
 
             // Chart Init
             let charts = {};
