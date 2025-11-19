@@ -1,6 +1,6 @@
 # ProjetoInter
 
-EstoquePro v15.0 Enterprise 🚀
+ConfereAI v1.0 Enterprise 🚀
 
 Sistema de Gestão de Estoque Completo e Integrado
 
