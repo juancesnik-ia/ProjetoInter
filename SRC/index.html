@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConfereAI v2.0</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        slate: { 850: '#1e293b', 900: '#0f172a', 950: '#020617' },
+                        primary: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' }
+                    },
+                    animation: { 'fade-in': 'fadeIn 0.4s ease-out forwards' },
+                    keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
+                }
+            }
+        }
+    </script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Globais */
+        body { transition: background-color 0.3s, color 0.3s; font-family: 'Inter', sans-serif; }
+        .sidebar-transition { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .page-content { display: none; }
+        .page-content.active { display: block; animation: fadeIn 0.4s ease-out; }
+
+        /* Toast */
+        .toast {
+            visibility: hidden; min-width: 300px; position: fixed; z-index: 100; right: 24px; bottom: 24px;
+            transform: translateY(20px); opacity: 0; transition: all 0.3s;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+        }
+        .toast.show { visibility: visible; transform: translateY(0); opacity: 1; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        
+        /* Glass Panel */
+        .glass-panel { background: rgba(255, 255, 255, 0.98); }
+        .dark .glass-panel { background: rgba(15, 23, 42, 0.98); }
+
+        th.sortable { cursor: pointer; user-select: none; }
+        th.sortable:hover { color: #6366f1; }
+        
+        /* Form Focus */
+        input:focus, select:focus, textarea:focus { outline: 2px solid #6366f1; outline-offset: -1px; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-200 h-screen overflow-hidden flex selection:bg-primary-500 selection:text-white">
+
+    <!-- Mobile Header -->
+    <div class="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 z-40 shadow-sm">
+        <div class="font-bold text-xl flex items-center gap-2">
+            <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>
+            <span class="dark:text-white">Confere<span class="text-primary-500">AI</span></span>
+        </div>
+        <button id="mobile-menu-btn" class="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+    </div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-72 bg-slate-900 dark:bg-slate-950 text-slate-300 transform -translate-x-full lg:translate-x-0 lg:static lg:flex flex-col z-50 sidebar-transition shadow-2xl border-r border-slate-800">
+        <div class="h-20 hidden lg:flex items-center justify-center text-2xl font-bold tracking-wider border-b border-slate-800 bg-slate-900 dark:bg-slate-950">
+            <div class="flex items-center gap-2">
+                <div class="w-9 h-9 bg-gradient-to-br from-primary-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                </div>
+                <span class="text-white">Confere<span class="text-primary-400">AI</span></span>
+            </div>
+        </div>
+
+        <div class="lg:hidden h-16 flex items-center justify-end px-4 border-b border-slate-800">
+            <button id="close-sidebar-btn" class="text-slate-400 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-2 mt-2">Principal</div>
+            <a href="#" data-page="dashboard" class="nav-link flex items-center px-4 py-3 rounded-xl transition-all bg-primary-600 text-white shadow-lg shadow-primary-900/20 group">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg> Dashboard
+            </a>
+            <a href="#" data-page="products" class="nav-link flex items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800 hover:text-white group">
+                <svg class="w-5 h-5 mr-3 group-hover:text-emerald-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg> Produtos
+            </a>
+            <a href="#" data-page="suppliers" class="nav-link flex items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800 hover:text-white group">
+                <svg class="w-5 h-5 mr-3 group-hover:text-cyan-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg> Fornecedores
+            </a>
+            <a href="#" data-page="categories" class="nav-link flex items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800 hover:text-white group">
+                <svg class="w-5 h-5 mr-3 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> Categorias
+            </a>
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-2 mt-6">Dados</div>
+            <a href="#" data-page="analysis" class="nav-link flex items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800 hover:text-white group">
+                <svg class="w-5 h-5 mr-3 group-hover:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg> Relatórios
+            </a>
+             <a href="#" data-page="movements" class="nav-link flex items-center px-4 py-3 rounded-xl transition-all hover:bg-slate-800 hover:text-white group">
+                 <svg class="w-5 h-5 mr-3 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Histórico
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-slate-800 bg-slate-900 dark:bg-slate-950 space-y-3">
+            <!-- Botões de Backup do Sistema -->
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="backupSystemData()" class="flex items-center justify-center px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-400 hover:text-white transition-colors border border-slate-700" title="Baixar Backup JSON">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Backup
+                </button>
+                <label class="flex items-center justify-center px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-400 hover:text-white transition-colors cursor-pointer border border-slate-700" title="Restaurar Backup JSON">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m-4 4v12"/></svg> Restaurar
+                    <input type="file" id="importFile" class="hidden" accept=".json">
+                </label>
+            </div>
+            <button id="theme-toggle" class="flex items-center justify-center w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors text-slate-300 text-sm font-medium border border-slate-700">
+                <span class="dark:hidden">Modo Escuro</span><span class="hidden dark:inline">Modo Claro</span>
+            </button>
+        </div>
+    </aside>
+
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/60 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 h-full overflow-y-auto p-6 lg:p-10 mt-16 lg:mt-0 relative scroll-smooth">
+        
+        <!-- DASHBOARD -->
+        <div id="dashboard-content" class="page-content active">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 animate-fade-in">
+                <div><h1 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">Visão Geral</h1><p class="text-slate-500 dark:text-slate-400 mt-1">Métricas em tempo real.</p></div>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 animate-fade-in delay-100">
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-2">Valor Estoque</p>
+                    <p id="kpi-stock-value" class="text-2xl font-bold text-slate-800 dark:text-white">R$ 0,00</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 animate-fade-in delay-200">
+                    <div class="flex justify-between"><p class="text-xs font-bold text-slate-400 uppercase mb-2">Lucro Estimado</p><span class="text-[10px] font-bold text-white bg-primary-500 px-2 py-0.5 rounded-full" id="kpi-margin">0%</span></div>
+                    <p id="kpi-profit" class="text-2xl font-bold text-primary-600 dark:text-primary-400">R$ 0,00</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 animate-fade-in delay-300">
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-2">Total Itens</p>
+                    <p id="kpi-total-items" class="text-2xl font-bold text-slate-800 dark:text-white">0</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 animate-fade-in delay-300">
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-2">Estoque Crítico</p>
+                    <p id="kpi-low-stock" class="text-2xl font-bold text-amber-500">0</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden h-[400px] flex flex-col animate-fade-in delay-200">
+                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 font-bold text-slate-700 dark:text-white">Atividade Recente</div>
+                    <div id="activity-feed" class="overflow-y-auto p-4 space-y-3 flex-1 custom-scrollbar"></div>
+                </div>
+                 <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden h-[400px] flex flex-col animate-fade-in delay-300">
+                    <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 font-bold text-slate-700 dark:text-white flex justify-between items-center">
+                        <span>Atenção Necessária</span>
+                        <span class="text-xs font-normal bg-amber-100 dark:bg-amber-900/30 text-amber-600 px-2 py-1 rounded-lg">Prioridade</span>
+                    </div>
+                    <div class="overflow-y-auto flex-1 custom-scrollbar">
+                        <table class="w-full text-left"><thead class="bg-slate-50 dark:bg-slate-900 sticky top-0"><tr class="text-xs text-slate-500 uppercase"><th class="px-6 py-3">Produto</th><th class="px-6 py-3 text-center">Min</th><th class="px-6 py-3 text-center">Atual</th><th class="px-6 py-3 text-center">Status</th></tr></thead><tbody id="low-stock-table-body" class="divide-y divide-slate-100 dark:divide-slate-700 text-sm dark:text-slate-300"></tbody></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div id="analysis-content" class="page-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 animate-fade-in">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 lg:col-span-2">
+                    <h3 class="font-bold text-slate-700 dark:text-white mb-4">Tendência (7 Dias)</h3>
+                    <div class="h-72 relative w-full"><canvas id="trendChart"></canvas></div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+                    <h3 class="font-bold text-slate-700 dark:text-white mb-4">Categorias</h3>
+                    <div class="h-64 relative w-full"><canvas id="categoryChart"></canvas></div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+                    <h3 class="font-bold text-slate-700 dark:text-white mb-4">Financeiro</h3>
+                    <div class="h-64 relative w-full flex justify-center"><canvas id="valueChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCTS -->
+        <div id="products-content" class="page-content">
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4 animate-fade-in">
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Catálogo</h1>
+                <div class="flex flex-wrap gap-3 w-full xl:w-auto">
+                    <!-- Botões CSV de Produtos -->
+                    <button onclick="exportToCSV('products')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl shadow-lg shadow-emerald-500/30 transition-all active:scale-95 text-sm font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Baixar CSV
+                    </button>
+                    <label class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl shadow-lg shadow-blue-500/30 transition-all active:scale-95 text-sm font-medium flex items-center cursor-pointer">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Importar CSV
+                        <input type="file" id="csvProductInput" class="hidden" accept=".csv">
+                    </label>
+                    <div class="w-px h-8 bg-slate-300 dark:bg-slate-700 mx-1 hidden md:block"></div>
+                    <button id="add-product-btn" class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2 rounded-xl shadow-lg shadow-primary-500/30 transition-all active:scale-95 text-sm font-medium flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Novo Produto
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 animate-fade-in delay-100">
+                 <input id="product-search" type="text" placeholder="Buscar produto..." class="md:col-span-2 w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none dark:text-white">
+                <select id="filter-category" class="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none dark:text-white cursor-pointer"></select>
+                <select id="filter-supplier" class="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none dark:text-white cursor-pointer"></select>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col h-[calc(100vh-280px)] animate-fade-in delay-200">
+                <div class="overflow-auto flex-1 custom-scrollbar">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 dark:bg-slate-900 sticky top-0 z-10 shadow-sm">
+                            <tr class="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
+                                <th class="px-6 py-3 font-semibold">Produto</th>
+                                <th class="px-6 py-3 font-semibold">Fornecedor</th>
+                                <th class="px-6 py-3 font-semibold text-center">Qtd</th>
+                                <th class="px-6 py-3 font-semibold text-right">Venda</th>
+                                <th class="px-6 py-3 font-semibold text-center">Status</th>
+                                <th class="px-6 py-3 font-semibold text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table-body" class="divide-y divide-slate-100 dark:divide-slate-700 text-sm dark:text-slate-300"></tbody>
+                    </table>
+                </div>
+                 <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900 flex justify-between items-center">
+                    <span class="text-sm text-slate-500 dark:text-slate-400" id="pagination-info">--</span>
+                    <div class="flex gap-2">
+                        <button id="prev-page" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors">Anterior</button>
+                        <button id="next-page" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors">Próximo</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUPPLIERS -->
+        <div id="suppliers-content" class="page-content">
+             <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 animate-fade-in">
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Fornecedores</h1>
+                <div class="flex gap-3">
+                    <!-- Botão CSV de Fornecedores -->
+                    <button onclick="exportToCSV('suppliers')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl shadow-lg shadow-emerald-500/30 transition-all active:scale-95 text-sm font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Lista CSV
+                    </button>
+                    <button id="add-supplier-btn" class="bg-primary-600 text-white px-5 py-2 rounded-xl hover:bg-primary-700 transition shadow-lg shadow-primary-500/30 text-sm font-medium flex gap-2 items-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Novo Fornecedor
+                    </button>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden animate-fade-in delay-100 flex flex-col h-[calc(100vh-200px)]">
+                <div class="overflow-auto flex-1 custom-scrollbar">
+                     <table class="w-full text-left">
+                        <thead class="bg-slate-50 dark:bg-slate-900 text-xs text-slate-500 uppercase sticky top-0"><tr class="border-b border-slate-100 dark:border-slate-700"><th class="px-6 py-4">Empresa</th><th class="px-6 py-4">CNPJ</th><th class="px-6 py-4">Contato</th><th class="px-6 py-4">Cidade/UF</th><th class="px-6 py-4 text-center w-32">Ações</th></tr></thead>
+                        <tbody id="suppliers-table-body" class="divide-y divide-slate-100 dark:divide-slate-700 text-sm dark:text-slate-300"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CATEGORIES -->
+        <div id="categories-content" class="page-content">
+             <div class="flex justify-between mb-6 animate-fade-in">
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Categorias</h1>
+                <button id="add-category-btn" class="bg-primary-600 text-white px-4 py-2 rounded-xl hover:bg-primary-700 transition shadow-lg shadow-primary-500/30 text-sm font-medium">Nova</button>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden max-w-2xl mx-auto animate-fade-in delay-100">
+                <table class="w-full text-left"><thead class="bg-slate-50 dark:bg-slate-900"><tr class="text-slate-500 dark:text-slate-400 text-xs uppercase"><th class="px-6 py-4">Nome</th><th class="px-6 py-4 text-center w-32">Ações</th></tr></thead><tbody id="categories-table-body" class="divide-y divide-slate-100 dark:divide-slate-700 text-sm dark:text-slate-300"></tbody></table>
+            </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div id="movements-content" class="page-content">
+            <div class="mb-6 animate-fade-in"><h1 class="text-2xl font-bold text-slate-800 dark:text-white">Histórico</h1></div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden h-[calc(100vh-180px)] flex flex-col animate-fade-in delay-100">
+                <div class="overflow-auto flex-1 custom-scrollbar">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 dark:bg-slate-900 sticky top-0 z-10"><tr class="text-slate-500 dark:text-slate-400 text-xs uppercase"><th class="px-6 py-3">Data</th><th class="px-6 py-3">Produto</th><th class="px-6 py-3">Tipo</th><th class="px-6 py-3 text-right">Qtd</th><th class="px-6 py-3 text-center">Saldo</th></tr></thead>
+                        <tbody id="movements-table-body" class="divide-y divide-slate-100 dark:divide-slate-700 text-sm dark:text-slate-300"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL PRODUTO -->
+    <div id="product-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4 transition-opacity">
+        <div class="glass-panel rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-fade-in border border-slate-200 dark:border-slate-700">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                <h2 id="modal-title" class="text-xl font-bold text-slate-800 dark:text-white">Produto</h2>
+                <button onclick="document.getElementById('product-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <form id="product-form" class="p-6 space-y-6">
+                <input type="hidden" id="productId">
+                
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="shrink-0 flex flex-col items-center gap-2">
+                        <div id="image-preview" class="w-28 h-28 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer hover:border-primary-500 transition-colors bg-slate-50 dark:bg-slate-800 overflow-hidden" onclick="document.getElementById('productImageInput').click()">
+                            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <span class="text-xs text-slate-400">Clique para alterar</span>
+                        <input type="file" id="productImageInput" class="hidden" accept="image/*">
+                    </div>
+                    <div class="flex-1 space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-2">
+                                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Nome</label>
+                                <input id="productName" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white transition-all" placeholder="Ex: Notebook Gamer" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">SKU</label>
+                                <input id="productSku" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" required>
+                            </div>
+                             <div>
+                                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Categoria</label>
+                                <select id="category" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" required></select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Fornecedor</label>
+                            <select id="supplier" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Custo (R$)</label>
+                        <input id="costPrice" type="text" oninput="maskCurrency(this)" class="w-full p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white font-mono" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1 uppercase">Venda (R$)</label>
+                        <input id="productPrice" type="text" oninput="maskCurrency(this)" class="w-full p-2 bg-white dark:bg-slate-800 border border-emerald-300 dark:border-emerald-700 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white font-mono" required>
+                    </div>
+                    <div>
+                         <label class="block text-xs font-bold text-amber-600 dark:text-amber-400 mb-1 uppercase">Mínimo</label>
+                         <input id="minStock" type="number" class="w-full p-2 bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 dark:text-white font-bold" required>
+                    </div>
+                </div>
+
+                <div id="initial-stock-container">
+                    <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Estoque Inicial</label>
+                    <input id="productQuantity" type="number" min="0" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" required>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="document.getElementById('product-modal').classList.add('hidden')" class="px-5 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-medium transition-colors">Cancelar</button>
+                    <button type="submit" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-lg transition-transform active:scale-95 font-medium">Salvar Produto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SUPPLIER MODAL (PADRONIZADO) -->
+    <div id="supplier-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4 transition-opacity">
+        <div class="glass-panel rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto animate-fade-in border border-slate-200 dark:border-slate-700">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                <h2 id="supplier-modal-title" class="text-xl font-bold text-slate-800 dark:text-white">Fornecedor</h2>
+                <button onclick="document.getElementById('supplier-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <form id="supplier-form" class="p-6 space-y-6">
+                <input type="hidden" id="supplierId">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Nome da Empresa</label>
+                        <input id="supplierName" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">CNPJ</label>
+                        <input id="supplierCnpj" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" placeholder="00.000.000/0000-00" oninput="maskCNPJ(this)">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Telefone</label>
+                        <input id="supplierPhone" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" placeholder="(00) 00000-0000" oninput="maskPhone(this)">
+                    </div>
+                </div>
+                
+                <div class="border-t border-slate-100 dark:border-slate-700 pt-4">
+                    <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 uppercase tracking-wide">Endereço Completo</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                         <div>
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">CEP</label>
+                             <input id="supplierCep" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" placeholder="00000-000" oninput="maskCEP(this)">
+                         </div>
+                         <div class="md:col-span-2">
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Rua</label>
+                             <input id="supplierAddress" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white">
+                         </div>
+                         <div>
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Número</label>
+                             <input id="supplierNumber" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white">
+                         </div>
+                         <div>
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Bairro</label>
+                             <input id="supplierDistrict" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white">
+                         </div>
+                         <div>
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">Cidade</label>
+                             <input id="supplierCity" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white">
+                         </div>
+                         <div>
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">UF</label>
+                             <input id="supplierState" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" maxlength="2" placeholder="SP">
+                         </div>
+                         <div class="md:col-span-2">
+                             <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase">E-mail</label>
+                             <input id="supplierEmail" type="email" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white">
+                         </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="document.getElementById('supplier-modal').classList.add('hidden')" class="px-5 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-medium transition-colors">Cancelar</button>
+                    <button type="submit" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-lg transition-transform active:scale-95 font-medium">Salvar Fornecedor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="category-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+        <div class="glass-panel rounded-2xl shadow-2xl p-6 w-full max-w-sm animate-enter border border-slate-200 dark:border-slate-700">
+            <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-4">Nova Categoria</h2>
+            <form id="category-form" class="space-y-4">
+                <input id="categoryNameInput" class="w-full p-3 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" placeholder="Nome" required>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="document.getElementById('category-modal').classList.add('hidden')" class="px-4 py-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-primary-600 text-white rounded-lg shadow active:scale-95 hover:bg-primary-700">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Stock Modal -->
+    <div id="stock-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+        <div class="glass-panel rounded-2xl shadow-2xl p-6 w-full max-w-md animate-enter border border-slate-200 dark:border-slate-700">
+            <h2 class="text-lg font-bold dark:text-white mb-4">Ajuste de Estoque</h2>
+            <form id="stock-form">
+                <input type="hidden" id="stockProductId">
+                <p id="stockProductName" class="text-slate-500 mb-4 font-medium text-sm uppercase tracking-wider"></p>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <label class="cursor-pointer p-3 border rounded-xl text-center hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border-slate-200 dark:border-slate-600 transition-colors">
+                        <input type="radio" name="movementType" value="entrada" checked class="hidden"> <span class="text-emerald-600 font-bold">Entrada</span>
+                    </label>
+                    <label class="cursor-pointer p-3 border rounded-xl text-center hover:bg-rose-50 dark:hover:bg-rose-900/20 border-slate-200 dark:border-slate-600 transition-colors">
+                        <input type="radio" name="movementType" value="saida" class="hidden"> <span class="text-rose-600 font-bold">Saída</span>
+                    </label>
+                </div>
+                <input id="movementQuantity" type="number" min="1" class="w-full p-3 border rounded-lg mb-4 dark:bg-slate-800 dark:border-slate-600 dark:text-white outline-none focus:ring-2 focus:ring-primary-500 text-center text-lg font-bold" required>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="document.getElementById('stock-modal').classList.add('hidden')" class="px-3 py-1.5 text-slate-500 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-1.5 bg-primary-600 text-white rounded-lg shadow-lg shadow-primary-500/30">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Delete Modal -->
+    <div id="delete-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+        <div class="glass-panel rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center animate-enter border border-slate-200 dark:border-slate-700">
+            <h3 class="text-lg font-bold dark:text-white">Confirmar Exclusão</h3>
+            <p class="text-slate-500 text-sm mt-2 mb-6">Esta ação é irreversível.</p>
+            <div class="flex justify-center gap-3">
+                <button onclick="document.getElementById('delete-modal').classList.add('hidden')" class="px-4 py-2 border rounded-lg dark:border-slate-600 dark:text-slate-300 hover:bg-slate-50">Cancelar</button>
+                <button id="confirm-delete-btn" class="px-4 py-2 bg-rose-600 text-white rounded-lg shadow-lg shadow-rose-500/30">Sim, Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const STORAGE_KEY = 'ConfereAI V2.0'; 
+            const ITEMS_PER_PAGE = 8;
+            let currentPage = 1;
+            
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.scale.grid.color = 'rgba(148, 163, 184, 0.1)';
+            Chart.defaults.plugins.tooltip.backgroundColor = '#0f172a';
+            
+            let state = {
+                products: [],
+                categories: [],
+                suppliers: [],
+                movements: [],
+                theme: 'light'
+            };
+
+            function init() {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    try {
+                        state = JSON.parse(saved);
+                        state.movements = state.movements.map(m => ({...m, date: new Date(m.date)}));
+                        if(!Array.isArray(state.suppliers)) state.suppliers = [];
+                        if(!Array.isArray(state.categories)) state.categories = [];
+                    } catch(e) { seedData(); }
+                } else {
+                    seedData();
+                }
+                applyTheme(state.theme);
+                renderAll();
+            }
+
+            function seedData() {
+                state.categories = ['Eletrônicos', 'Escritório', 'Vestuário', 'Informática'];
+                state.suppliers = [
+                     { id: 101, name: 'Mega Distribuidora LTDA', cnpj: '12.345.678/0001-99', phone: '(11) 98888-7777', email: 'vendas@mega.com', address: 'Rua das Indústrias', number: '1000', district: 'Centro', city: 'São Paulo', state: 'SP', cep: '01000-000' },
+                     { id: 102, name: 'Import Tech Global', cnpj: '98.765.432/0001-11', phone: '(21) 99999-8888', email: 'contato@importtech.com', address: 'Av. do Porto', number: '50', district: 'Zona Portuária', city: 'Rio de Janeiro', state: 'RJ', cep: '20000-000' }
+                ];
+                state.products = [
+                     { id: 1, name: 'Notebook Pro 15"', sku: 'NB-PRO-15', category: 'Informática', supplierId: 101, quantity: 10, minStock: 5, price: 4500.00, costPrice: 3200.00, image: null },
+                     { id: 2, name: 'Cadeira ErgoComfort', sku: 'CAD-ERGO', category: 'Escritório', supplierId: 102, quantity: 5, minStock: 2, price: 850.00, costPrice: 400.00, image: null }
+                ];
+                state.movements = [
+                    { id: 1, date: new Date(), productName: 'Notebook Pro 15"', type: 'cadastro', quantity: 10, newStock: 10 }
+                ];
+                saveData();
+            }
+
+            function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+            // --- GLOBAL RENDERER ---
+            function saveAndRender() {
+                saveData();
+                renderAll();
+            }
+            
+            function renderAll() {
+                renderDashboard();
+                if(document.getElementById('analysis-content').classList.contains('active')) renderAnalysis();
+                renderProductsTable();
+                renderCategories();
+                renderSuppliers();
+                renderMovements();
+                populateSelectors();
+            }
+
+            // --- CSV FUNCTIONS (IMPORT/EXPORT) ---
+            window.exportToCSV = (type) => {
+                let csvContent = "data:text/csv;charset=utf-8,";
+                let filename = "export.csv";
+
+                if (type === 'products') {
+                    csvContent += "ID,Nome,SKU,Categoria,Qtd,Preço,Custo,FornecedorID\n";
+                    state.products.forEach(p => {
+                        const row = [
+                            p.id,
+                            `"${p.name.replace(/"/g, '""')}"`, // Escape quotes
+                            p.sku,
+                            p.category,
+                            p.quantity,
+                            p.price.toFixed(2),
+                            (p.costPrice || 0).toFixed(2),
+                            p.supplierId || ''
+                        ].join(",");
+                        csvContent += row + "\n";
+                    });
+                    filename = "produtos_estoque.csv";
+                } else if (type === 'suppliers') {
+                    csvContent += "ID,Nome,CNPJ,Telefone,Email,Cidade,UF\n";
+                    state.suppliers.forEach(s => {
+                        const row = [
+                            s.id,
+                            `"${s.name.replace(/"/g, '""')}"`,
+                            s.cnpj,
+                            s.phone,
+                            s.email,
+                            s.city,
+                            s.state
+                        ].join(",");
+                        csvContent += row + "\n";
+                    });
+                    filename = "fornecedores_estoque.csv";
+                }
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", filename);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            document.getElementById('csvProductInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const csvData = event.target.result;
+                    const lines = csvData.split('\n');
+                    let importedCount = 0;
+
+                    // Skip header (start at 1)
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+
+                        // Simple CSV Split (Note: doesn't handle commas inside quotes perfectly without regex, but works for simple CSVs)
+                        const cols = line.split(','); 
+                        
+                        // Expected: ID,Nome,SKU,Categoria,Qtd,Preço,Custo,FornecedorID
+                        // We ignore ID for import to avoid conflict, generate new ID
+                        if (cols.length >= 3) {
+                            const name = cols[1].replace(/"/g, '');
+                            const sku = cols[2];
+                            
+                            // Check if SKU exists
+                            if (state.products.some(p => p.sku === sku)) continue;
+
+                            const newProd = {
+                                id: Date.now() + i,
+                                name: name,
+                                sku: sku,
+                                category: cols[3] || 'Geral',
+                                quantity: parseInt(cols[4]) || 0,
+                                price: parseFloat(cols[5]) || 0,
+                                costPrice: parseFloat(cols[6]) || 0,
+                                supplierId: parseInt(cols[7]) || null,
+                                minStock: 5,
+                                image: null
+                            };
+                            
+                            // Ensure category exists
+                            if (!state.categories.includes(newProd.category)) {
+                                state.categories.push(newProd.category);
+                            }
+
+                            state.products.push(newProd);
+                            importedCount++;
+                        }
+                    }
+                    alert(`${importedCount} produtos importados com sucesso!`);
+                    saveAndRender();
+                    e.target.value = ''; // Reset input
+                };
+                reader.readAsText(file);
+            });
+            
+            // Backup System JSON
+            window.backupSystemData = () => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+                const link = document.createElement('a');
+                link.setAttribute("href", dataStr);
+                link.setAttribute("download", "backup_sistema_estoque.json");
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            };
+            
+            document.getElementById('importFile').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const newState = JSON.parse(event.target.result);
+                        if(newState.products && newState.suppliers) {
+                            state = newState;
+                            state.movements = state.movements.map(m => ({...m, date: new Date(m.date)}));
+                            saveAndRender();
+                            alert('Backup restaurado com sucesso!');
+                        } else { throw new Error('Formato inválido'); }
+                    } catch(err) { alert('Erro ao ler arquivo de backup.'); }
+                };
+                reader.readAsText(file);
+            });
+
+            // --- DASHBOARD ---
+            function renderDashboard() {
+                const totalVal = state.products.reduce((acc, p) => acc + (p.price * p.quantity), 0);
+                const totalCost = state.products.reduce((acc, p) => acc + (p.costPrice || 0) * p.quantity, 0);
+                const profit = totalVal - totalCost;
+                const margin = totalVal > 0 ? ((profit/totalVal)*100).toFixed(1) : 0;
+
+                document.getElementById('kpi-stock-value').textContent = formatCurrency(totalVal);
+                document.getElementById('kpi-profit').textContent = formatCurrency(profit);
+                document.getElementById('kpi-margin').textContent = margin + '%';
+                document.getElementById('kpi-total-items').textContent = state.products.reduce((acc, p) => acc + p.quantity, 0);
+                document.getElementById('kpi-low-stock').textContent = state.products.filter(p => p.quantity <= p.minStock).length;
+
+                // Feed
+                const feed = document.getElementById('activity-feed');
+                feed.innerHTML = '';
+                state.movements.slice(0, 6).forEach(m => {
+                    const color = m.type.includes('entrada') || m.type === 'cadastro' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700';
+                    feed.innerHTML += `<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition"><div class="w-8 h-8 rounded-full ${color} flex items-center justify-center text-xs font-bold">${m.type[0].toUpperCase()}</div><div class="flex-1"><p class="text-sm font-medium dark:text-slate-200">${m.productName}</p><p class="text-xs text-slate-400">${new Date(m.date).toLocaleDateString()}</p></div><span class="font-mono text-sm font-bold dark:text-slate-300">${m.quantity}</span></div>`;
+                });
+                
+                // Alertas
+                const critTable = document.getElementById('low-stock-table-body');
+                critTable.innerHTML = '';
+                state.products.filter(p => p.quantity <= p.minStock).forEach(p => {
+                     critTable.innerHTML += `<tr class="border-b border-slate-100 dark:border-slate-700"><td class="px-6 py-3 font-medium text-slate-700 dark:text-slate-300">${p.name}</td><td class="px-6 py-3 text-center text-slate-500">${p.minStock}</td><td class="px-6 py-3 text-center font-bold text-amber-500">${p.quantity}</td><td class="px-6 py-3 text-center"><span class="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded text-xs font-bold">Baixo</span></td></tr>`;
+                });
+            }
+
+            // --- PRODUCT TABLE ---
+            function renderProductsTable() {
+                const tbody = document.getElementById('products-table-body');
+                tbody.innerHTML = '';
+                const search = document.getElementById('product-search').value.toLowerCase();
+                const catFilter = document.getElementById('filter-category').value;
+                const supFilter = document.getElementById('filter-supplier').value;
+
+                let filtered = state.products.filter(p => {
+                    const s = state.suppliers.find(x => x.id == p.supplierId);
+                    const supName = s ? s.name.toLowerCase() : '';
+                    const matchesText = p.name.toLowerCase().includes(search) || p.sku.toLowerCase().includes(search) || supName.includes(search);
+                    const matchesCat = !catFilter || p.category === catFilter;
+                    const matchesSup = !supFilter || p.supplierId == supFilter;
+                    return matchesText && matchesCat && matchesSup;
+                });
+
+                const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+                if(currentPage > totalPages) currentPage = 1;
+                const start = (currentPage - 1) * ITEMS_PER_PAGE;
+                const paged = filtered.slice(start, start + ITEMS_PER_PAGE);
+                
+                document.getElementById('pagination-info').innerText = filtered.length ? `${start+1}-${Math.min(start+ITEMS_PER_PAGE, filtered.length)} de ${filtered.length}` : '--';
+                document.getElementById('prev-page').disabled = currentPage === 1;
+                document.getElementById('next-page').disabled = currentPage >= totalPages || totalPages === 0;
+
+                if(paged.length === 0) { tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400">Nenhum produto encontrado.</td></tr>`; return; }
+
+                paged.forEach(p => {
+                    const sup = state.suppliers.find(x => x.id == p.supplierId);
+                    const supName = sup ? sup.name : 'N/A';
+                    const badge = p.quantity === 0 ? 'bg-rose-100 text-rose-600' : p.quantity <= p.minStock ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600';
+                    const status = p.quantity === 0 ? 'Esgotado' : p.quantity <= p.minStock ? 'Baixo' : 'OK';
+                    const img = p.image ? `<img src="${p.image}" class="w-10 h-10 rounded-lg object-cover">` : `<div class="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-xs font-bold text-slate-400">${p.name.substring(0,2).toUpperCase()}</div>`;
+
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                            <td class="px-6 py-3"><div class="flex items-center gap-3">${img}<div><span class="font-medium dark:text-slate-200 block">${p.name}</span><span class="text-[10px] text-slate-400 uppercase">${supName}</span></div></div></td>
+                            <td class="px-6 py-3 text-slate-500">${supName}</td>
+                            <td class="px-6 py-3 text-center font-bold dark:text-slate-300">${p.quantity}</td>
+                            <td class="px-6 py-3 text-right dark:text-slate-300">${formatCurrency(p.price)}</td>
+                            <td class="px-6 py-3 text-center"><span class="px-2 py-1 rounded text-xs font-bold ${badge}">${status}</span></td>
+                            <td class="px-6 py-3 text-center">
+                                <div class="flex justify-center gap-2">
+                                    <button onclick="openStockModal(${p.id})" class="text-primary-600 hover:bg-primary-50 p-1 rounded" title="Estoque"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg></button>
+                                    <button onclick="openEditModal(${p.id})" class="text-slate-400 hover:text-primary-500 p-1" title="Editar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                                    <button onclick="openDeleteModal(${p.id}, 'product')" class="text-slate-400 hover:text-rose-500 p-1" title="Excluir"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                });
+            }
+
+            // --- SUPPLIERS ---
+            function renderSuppliers() {
+                const tbody = document.getElementById('suppliers-table-body');
+                tbody.innerHTML = '';
+                if (state.suppliers.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">Nenhum fornecedor cadastrado.</td></tr>`; return; }
+                state.suppliers.forEach((s) => {
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                            <td class="px-6 py-4"><div class="font-medium dark:text-slate-200">${s.name}</div><div class="text-xs text-slate-400">${s.address}, ${s.number} - ${s.city}/${s.state}</div></td>
+                            <td class="px-6 py-4 font-mono text-sm text-slate-500">${s.cnpj || '-'}</td>
+                            <td class="px-6 py-4 text-sm text-slate-500"><div>${s.phone || ''}</div><div class="text-xs">${s.email || ''}</div></td>
+                            <td class="px-6 py-4 text-sm text-slate-500">${s.city}/${s.state}</td>
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex justify-center gap-2">
+                                    <button onclick="openSupplierModal(${s.id})" class="text-slate-400 hover:text-primary-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                                    <button onclick="openDeleteModal(${s.id}, 'supplier')" class="text-slate-400 hover:text-rose-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                });
+            }
+
+            // --- CATEGORIES & MOVEMENTS ---
+            function renderCategories() {
+                const tbody = document.getElementById('categories-table-body');
+                tbody.innerHTML = '';
+                state.categories.forEach((c, i) => {
+                    tbody.innerHTML += `<tr class="border-b border-slate-100 dark:border-slate-700"><td class="px-6 py-4 font-medium dark:text-slate-200">${c}</td><td class="px-6 py-4 text-center"><button onclick="openDeleteModal(${i}, 'category')" class="text-slate-400 hover:text-rose-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td></tr>`;
+                });
+            }
+            
+            function renderMovements() {
+                const tbody = document.getElementById('movements-table-body');
+                tbody.innerHTML = '';
+                state.movements.slice(0, 100).forEach(m => {
+                    const style = m.type.includes('entrada') || m.type==='cadastro' ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' : 'text-rose-600 bg-rose-50 dark:bg-rose-900/20';
+                    const sign = m.type.includes('entrada') || m.type==='cadastro' ? '+' : '-';
+                    tbody.innerHTML += `<tr class="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50"><td class="px-6 py-3 text-slate-500 text-xs">${new Date(m.date).toLocaleString('pt-BR')}</td><td class="px-6 py-3 dark:text-slate-200">${m.productName}</td><td class="px-6 py-3"><span class="px-2 py-1 rounded text-xs font-bold uppercase ${style}">${m.type}</span></td><td class="px-6 py-3 text-right font-bold dark:text-slate-300">${sign}${m.quantity}</td><td class="px-6 py-3 text-center text-slate-500">${m.newStock}</td></tr>`;
+                });
+            }
+
+            // --- LOGIC & MODALS ---
+            let editingId = null, stockId = null, deleteId = null, deleteType = null, currentImage = null, supplierEditingId = null;
+
+            function populateSelectors() {
+                const catSel = document.getElementById('category');
+                const filterCat = document.getElementById('filter-category');
+                const supSel = document.getElementById('supplier');
+                const filterSup = document.getElementById('filter-supplier');
+                
+                const fill = (el, list, label, useId=false) => {
+                    const curr = el.value;
+                    el.innerHTML = `<option value="">${label}</option>`;
+                    list.forEach(i => {
+                        const val = useId ? i.id : i;
+                        const txt = useId ? i.name : i;
+                        el.innerHTML += `<option value="${val}">${txt}</option>`;
+                    });
+                    if(curr) el.value = curr;
+                };
+
+                fill(catSel, state.categories, 'Selecione...');
+                fill(filterCat, state.categories, 'Todas Categorias');
+                fill(supSel, state.suppliers, 'Selecione Fornecedor', true);
+                fill(filterSup, state.suppliers, 'Todos Fornecedores', true);
+            }
+
+            // --- PRODUCT FORM ---
+            document.getElementById('add-product-btn').addEventListener('click', () => {
+                editingId = null;
+                document.getElementById('product-form').reset();
+                document.getElementById('modal-title').innerText = 'Novo Produto';
+                document.getElementById('initial-stock-container').classList.remove('hidden');
+                document.getElementById('productSku').disabled = false;
+                document.getElementById('image-preview').innerHTML = `<svg class="w-12 h-12 text-slate-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`;
+                document.getElementById('product-modal').classList.remove('hidden');
+            });
+
+            document.getElementById('product-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const data = {
+                    name: document.getElementById('productName').value,
+                    sku: document.getElementById('productSku').value,
+                    category: document.getElementById('category').value,
+                    supplierId: document.getElementById('supplier').value,
+                    price: parseCurrency(document.getElementById('productPrice').value),
+                    costPrice: parseCurrency(document.getElementById('costPrice').value),
+                    minStock: parseInt(document.getElementById('minStock').value),
+                    image: currentImage
+                };
+                
+                if(editingId) {
+                    const idx = state.products.findIndex(p=>p.id===editingId);
+                    data.quantity = state.products[idx].quantity; // Preserve current qty
+                    state.products[idx] = { ...state.products[idx], ...data };
+                } else {
+                    const qty = parseInt(document.getElementById('productQuantity').value);
+                    if(state.products.some(p=>p.sku === data.sku)) { alert('Erro: SKU já existe!'); return; }
+                    state.products.push({ ...data, id: Date.now(), quantity: qty });
+                    addMovementLog(data.name, 'cadastro', qty, qty);
+                }
+                document.getElementById('product-modal').classList.add('hidden');
+                saveAndRender();
+            });
+
+            window.openEditModal = (id) => {
+                editingId = id;
+                const p = state.products.find(x => x.id === id);
+                document.getElementById('modal-title').innerText = 'Editar Produto';
+                document.getElementById('productName').value = p.name;
+                document.getElementById('productSku').value = p.sku;
+                document.getElementById('productSku').disabled = true;
+                document.getElementById('category').value = p.category;
+                document.getElementById('supplier').value = p.supplierId || '';
+                document.getElementById('productPrice').value = p.price.toFixed(2).replace('.',',');
+                document.getElementById('costPrice').value = (p.costPrice||0).toFixed(2).replace('.',',');
+                document.getElementById('minStock').value = p.minStock;
+                document.getElementById('initial-stock-container').classList.add('hidden');
+                currentImage = p.image;
+                document.getElementById('image-preview').innerHTML = p.image ? `<img src="${p.image}" class="w-full h-full object-cover rounded-xl">` : `<svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`;
+                document.getElementById('product-modal').classList.remove('hidden');
+            };
+
+            // --- SUPPLIER FORM ---
+            document.getElementById('add-supplier-btn').addEventListener('click', () => { 
+                supplierEditingId = null; 
+                document.getElementById('supplier-form').reset(); 
+                document.getElementById('supplier-modal-title').innerText = 'Novo Fornecedor';
+                document.getElementById('supplier-modal').classList.remove('hidden'); 
+            });
+            
+            window.openSupplierModal = (id) => {
+                supplierEditingId = id;
+                const s = state.suppliers.find(x => x.id === id);
+                document.getElementById('supplier-modal-title').innerText = 'Editar Fornecedor';
+                document.getElementById('supplierName').value = s.name;
+                document.getElementById('supplierCnpj').value = s.cnpj;
+                document.getElementById('supplierPhone').value = s.phone;
+                document.getElementById('supplierEmail').value = s.email;
+                document.getElementById('supplierAddress').value = s.address;
+                document.getElementById('supplierNumber').value = s.number;
+                document.getElementById('supplierDistrict').value = s.district;
+                document.getElementById('supplierCity').value = s.city;
+                document.getElementById('supplierState').value = s.state;
+                document.getElementById('supplierCep').value = s.cep;
+                document.getElementById('supplier-modal').classList.remove('hidden');
+            };
+
+            document.getElementById('supplier-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const data = {
+                    name: document.getElementById('supplierName').value,
+                    cnpj: document.getElementById('supplierCnpj').value,
+                    phone: document.getElementById('supplierPhone').value,
+                    email: document.getElementById('supplierEmail').value,
+                    address: document.getElementById('supplierAddress').value,
+                    number: document.getElementById('supplierNumber').value,
+                    district: document.getElementById('supplierDistrict').value,
+                    city: document.getElementById('supplierCity').value,
+                    state: document.getElementById('supplierState').value,
+                    cep: document.getElementById('supplierCep').value
+                };
+                if(supplierEditingId) {
+                    const idx = state.suppliers.findIndex(s => s.id === supplierEditingId);
+                    state.suppliers[idx] = {...state.suppliers[idx], ...data};
+                } else {
+                    state.suppliers.push({id: Date.now(), ...data});
+                }
+                document.getElementById('supplier-modal').classList.add('hidden');
+                saveAndRender();
+            });
+
+            // --- OTHER LOGIC ---
+            document.getElementById('add-category-btn').addEventListener('click', () => { document.getElementById('category-form').reset(); document.getElementById('category-modal').classList.remove('hidden'); });
+            document.getElementById('category-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('categoryNameInput').value;
+                if(state.categories.includes(name)) { alert('Categoria já existe!'); return; }
+                state.categories.push(name);
+                document.getElementById('category-modal').classList.add('hidden');
+                saveAndRender();
+            });
+
+            window.openStockModal = (id) => { stockId = id; const p = state.products.find(x=>x.id===id); document.getElementById('stockProductName').innerText = p.name; document.getElementById('movementQuantity').value = ''; document.getElementById('stock-modal').classList.remove('hidden'); };
+            document.getElementById('stock-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const p = state.products.find(x=>x.id===stockId);
+                const type = document.querySelector('input[name="movementType"]:checked').value;
+                const qty = parseInt(document.getElementById('movementQuantity').value);
+                if(type==='saida' && qty>p.quantity) { alert('Estoque insuficiente!'); return; }
+                p.quantity = type==='entrada' ? p.quantity + qty : p.quantity - qty;
+                addMovementLog(p.name, type, qty, p.quantity);
+                document.getElementById('stock-modal').classList.add('hidden');
+                saveAndRender();
+            });
+
+            window.openDeleteModal = (id, type) => { deleteId = id; deleteType = type; document.getElementById('delete-modal').classList.remove('hidden'); };
+            document.getElementById('confirm-delete-btn').addEventListener('click', () => {
+                if(deleteType === 'product') state.products = state.products.filter(p=>p.id!==deleteId);
+                if(deleteType === 'supplier') {
+                    if(state.products.some(p=>p.supplierId == deleteId)) { alert('Erro: Fornecedor em uso!'); return; }
+                    state.suppliers = state.suppliers.filter(s=>s.id!==deleteId);
+                }
+                if(deleteType === 'category') {
+                    if(state.products.some(p=>p.category === state.categories[deleteId])) { alert('Erro: Categoria em uso!'); return; }
+                    state.categories.splice(deleteId, 1);
+                }
+                document.getElementById('delete-modal').classList.add('hidden');
+                saveAndRender();
+            });
+
+            // HELPERS
+            window.maskCurrency = (el) => { let v=el.value.replace(/\D/g,''); v=(v/100).toFixed(2)+''; el.value = v.replace('.',',').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.'); };
+            window.maskCNPJ = (el) => { el.value = el.value.replace(/\D/g,'').replace(/^(\d{2})(\d)/,"$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/,"$1.$2.$3").replace(/\.(\d{3})(\d)/,".$1/$2").replace(/(\d{4})(\d)/,"$1-$2").substring(0,18); }
+            window.maskPhone = (el) => { el.value = el.value.replace(/\D/g,'').replace(/^(\d{2})(\d)/,"($1) $2").replace(/(\d)(\d{4})$/,"$1-$2").substring(0,15); }
+            window.maskCEP = (el) => { el.value = el.value.replace(/\D/g,'').replace(/^(\d{5})(\d)/,"$1-$2").substring(0,9); }
+            const parseCurrency = (s) => parseFloat(s.replace(/\./g,'').replace(',','.')) || 0;
+            const formatCurrency = (v) => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+            
+            document.getElementById('productImageInput').addEventListener('change', (e) => {
+                const f = e.target.files[0];
+                if(f && f.size <= 2000000) { const r = new FileReader(); r.onload = (ev) => { currentImage = ev.target.result; document.getElementById('image-preview').innerHTML = `<img src="${currentImage}" class="w-full h-full object-cover rounded-xl">`; }; r.readAsDataURL(f); }
+                else alert('Imagem muito grande (Max 2MB)');
+            });
+
+            // REMOVIDO: Listener do factory-reset-btn que causava o erro
+            
+            document.getElementById('prev-page').addEventListener('click', () => { if(currentPage > 1) { currentPage--; renderProductsTable(); } });
+            document.getElementById('next-page').addEventListener('click', () => { currentPage++; renderProductsTable(); });
+            document.getElementById('product-search').addEventListener('input', () => { currentPage = 1; renderProductsTable(); });
+            document.getElementById('filter-category').addEventListener('change', () => { currentPage = 1; renderProductsTable(); });
+            document.getElementById('filter-supplier').addEventListener('change', () => { currentPage = 1; renderProductsTable(); });
+
+            function addMovementLog(productName, type, qty, newStock) {
+                state.movements.unshift({ id: Date.now(), date: new Date(), productName, type, quantity: qty, newStock });
+            }
+            
+            function applyTheme(t) { state.theme = t; t === 'dark' ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark'); saveData(); }
+            document.getElementById('theme-toggle').addEventListener('click', () => applyTheme(state.theme === 'dark' ? 'light' : 'dark'));
+            
+            // Navigation
+            document.querySelectorAll('.nav-link').forEach(l => {
+                l.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+                    document.getElementById(l.dataset.page + '-content').classList.add('active');
+                    document.querySelectorAll('.nav-link').forEach(n => { n.classList.remove('bg-primary-600', 'text-white', 'shadow-lg'); n.classList.add('text-slate-400', 'hover:bg-slate-800', 'hover:text-white'); });
+                    l.classList.remove('text-slate-400', 'hover:bg-slate-800', 'hover:text-white'); l.classList.add('bg-primary-600', 'text-white', 'shadow-lg');
+                    if(window.innerWidth < 1024) toggleSidebar();
+                    if(l.dataset.page === 'analysis') setTimeout(renderAnalysis, 50);
+                });
+            });
+            
+            const toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('sidebar-overlay').classList.toggle('hidden'); };
+            document.getElementById('mobile-menu-btn').addEventListener('click', toggleSidebar);
+            document.getElementById('close-sidebar-btn').addEventListener('click', toggleSidebar);
+            document.getElementById('sidebar-overlay').addEventListener('click', toggleSidebar);
+
+            // Chart Init
+            let charts = {};
+            function renderAnalysis() {
+                const labels = [], entries = [], exits = [];
+                for(let i=6; i>=0; i--) {
+                    const d = new Date(); d.setDate(d.getDate() - i);
+                    const key = d.toISOString().split('T')[0];
+                    labels.push(d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}));
+                    const dayMovs = state.movements.filter(m => new Date(m.date).toISOString().split('T')[0] === key);
+                    entries.push(dayMovs.filter(m => m.type==='entrada' || m.type==='cadastro').reduce((s,m)=>s+m.quantity,0));
+                    exits.push(dayMovs.filter(m => m.type==='saida').reduce((s,m)=>s+m.quantity,0));
+                }
+                
+                const trendCtx = document.getElementById('trendChart').getContext('2d');
+                if(charts.trend) charts.trend.destroy();
+                charts.trend = new Chart(trendCtx, { type: 'line', data: { labels, datasets: [{label:'Entradas', data:entries, borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', fill:true, tension:0.4}, {label:'Saídas', data:exits, borderColor:'#f43f5e', backgroundColor:'rgba(244,63,94,0.1)', fill:true, tension:0.4}] }, options: { responsive: true, maintainAspectRatio: false } });
+
+                const cats = [...new Set(state.products.map(p=>p.category))];
+                const qtys = cats.map(c => state.products.filter(p=>p.category===c).reduce((s,p)=>s+p.quantity,0));
+                const catCtx = document.getElementById('categoryChart').getContext('2d');
+                if(charts.cat) charts.cat.destroy();
+                charts.cat = new Chart(catCtx, { type: 'doughnut', data: { labels: cats, datasets: [{ data: qtys, backgroundColor: ['#6366f1', '#ec4899', '#10b981', '#f59e0b'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+                
+                const rev = cats.map(c => state.products.filter(p=>p.category===c).reduce((s,p)=>s+(p.price*p.quantity),0));
+                const cost = cats.map(c => state.products.filter(p=>p.category===c).reduce((s,p)=>s+((p.costPrice||0)*p.quantity),0));
+                const valCtx = document.getElementById('valueChart').getContext('2d');
+                if(charts.val) charts.val.destroy();
+                charts.val = new Chart(valCtx, { type: 'bar', data: { labels: cats, datasets: [{ label: 'Venda Potencial', data: rev, backgroundColor: '#6366f1' }, { label: 'Custo Total', data: cost, backgroundColor: '#94a3b8' }] }, options: { responsive: true, maintainAspectRatio: false } });
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
